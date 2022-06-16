@@ -10,9 +10,9 @@ using namespace std;
 
 namespace camera {
 
-	/*********   Function  *********/
+	/***************************   Function  ****************************/
 	// init camera settings
-	void init_CameraFunc();
+	void init_Func();
 	// if not open, then return true;
 	bool openCheck();
 
@@ -28,7 +28,7 @@ namespace camera {
 
 
 
-	/*********   Variable  *********/
+	/***************************    Variable  ****************************/
 
 	// haar 파일 불러오기
 	CascadeClassifier face_cascade;	 // face
@@ -43,15 +43,12 @@ namespace camera {
 	vector<Rect> eyes; 
 	Mat frame_gray;
 
-	// 동영상 설정
-	double fps = 30.0;
-
 	int width;	
 	int height;	
 
 
 
-	void init_CameraFunc() {
+	void init_Func() {
 		// file
 		face_cascade.load("C:/OpenCV_test/opencv/sources/data/haarcascades/haarcascade_frontalface_alt.xml");
 		eye_cascade.load("C:/OpenCV_test/opencv/sources/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml");
@@ -83,7 +80,7 @@ namespace camera {
 		equalizeHist(frame_gray, frame_gray);
 
 		face_cascade.detectMultiScale(frame_gray, faces, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(50, 50));
-		eye_cascade.detectMultiScale(frame_gray, eyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(50, 50));
+		//eye_cascade.detectMultiScale(frame_gray, eyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(50, 50));
 		
 		// public void detectMultiScale(Mat image, MatOfRect objects, double scaleFactor, int minNeighbors, int flags, Size minSize)
 		// image : 카메라에서 가져온 프레임을 가공하여 검출하고자 하는 대상이 있는 확인하기 위한 원본 이미지
@@ -99,10 +96,10 @@ namespace camera {
 		}
 
 
-		for (size_t i = 0; i < eyes.size(); i++)
+		/*for (size_t i = 0; i < eyes.size(); i++)
 		{
 			rectangle(frame, eyes[i], Scalar(0, 255, 255), 2, 8, 0);
-		}
+		}*/
 	}
 
 	void showImage() {
