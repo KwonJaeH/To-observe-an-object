@@ -19,15 +19,15 @@ int main()
 		camera::readFrame();
 
 		// extract face and draw ellipse
-		camera::extract_face_and_eye();
+		camera::extract_face();
 
 		// show current frame
 		camera::showImage();
 		camera::drawSettingWindow();
-		cout << camera::current_x << " , " << camera::current_y << "\n";
+		
 		// finish check
 		if (camera::SettingisFinished()) {
-			camera::setCurrentFacePos();
+			camera::setOrgFacePos();
 			break;
 		}
 		
@@ -37,29 +37,40 @@ int main()
 
 	while (object::windowIsOpened()) {
 		
+		// read frame
 		camera::readFrame();
+		
+		// show current frmae
 		camera::showImage();
 
+		// drawanimation
 		object::animationLoop();
 
-		camera::extract_face_and_eye();
+		// extract face
+		camera::extract_face();
 		
 		int status;
 
 		status = camera::isDetectedFaceMovement_direct_of_X();
 		if (status) {
-			float move_x = camera::returnMoveDegree(status);
-			object::updateFace_Position(move_x, status);
-			object::updateCamera_Position(status);
+			float move_x = camera::returnMoveDegreeXYZ(status);
+			object::updateFace_Position_for_XYZ(move_x, status);
+
 		}
 
 		status = camera::isDetectedFaceMovement_direct_of_Y();
 		if (status) {
-			float move_y = camera::returnMoveDegree(status);
-			object::updateFace_Position(move_y, status);
-			object::updateCamera_Position(status);
+			float move_y = camera::returnMoveDegreeXYZ(status);
+			object::updateFace_Position_for_XYZ(move_y, status);
+	
 		}
 		
+		status = camera::isDetectedFaceMovement_direct_of_Z();
+		if (status) {
+			float move_z = camera::returnMoveDegreeXYZ(status);
+			object::updateFace_Position_for_XYZ(move_z, status);
+		}
+
 
 		if (camera::turnOff()) {
 			break;

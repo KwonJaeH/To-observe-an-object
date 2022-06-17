@@ -28,16 +28,7 @@ using namespace std::chrono;
 
 namespace object {
 
-	/***************************   Function  ****************************/
-	// init GL settings
-	void init_Func(void);
-	void updateFunc(void);
-	void drawFunc(void);
-	void refreshFunc(GLFWwindow* window);
-	bool windowIsOpened();
-	void animationLoop();
-	void done();
-
+	/***************************    Variable  ****************************/
 
 	const unsigned int WIN_W = 500; // window size in pixels, (Width, Height)
 	const unsigned int WIN_H = 500;
@@ -65,14 +56,14 @@ namespace object {
 	glm::mat4 matView = glm::mat4(1.0F);
 	glm::mat4 matProj = glm::mat4(1.0F);
 
-	float theta = 0.0F;
-	system_clock::time_point lastTime = system_clock::now();
-
-
 	glm::vec3 current_face_position = glm::vec3(0.0F, 0.0F, 2.0F);
 	glm::vec3 current_glCamera_position = glm::vec3(0.0F, 0.0F, 2.0F);
 
 	float fovy = ((GLfloat)M_PI / 180.0F) * 30.0F; // 30 degree
+
+	float org_degree = 30.0F;
+	float current_degree = 30.0F;
+
 
 	glm::vec4 vertCube[] = { // 12 * 3 = 36 (vertices + color)
 		// face 0,1: v0-v3-v2, v0-v2-v1, red
@@ -120,21 +111,36 @@ namespace object {
 	};
 
 
-	void updateFunc(void) {
-		system_clock::time_point curTime = system_clock::now();
-		milliseconds elapsedTimeMSEC = duration_cast<milliseconds>(curTime - lastTime); // in millisecond
-		theta = (elapsedTimeMSEC.count() / 1000.0F) * (float)M_PI_2; // in <math.h>, M_PI_2 = pi/2
+	/***************************   Function  *****************************/
+	// init GL settings
+	void init_Func(void);
+	void updateFunc(void);
+	void drawFunc(void);
+	void refreshFunc(GLFWwindow* window);
+	bool windowIsOpened();
+	void animationLoop();
+	void done();
 
+	void updateFace_Position_for_XYZ(float _moveDegree, int status);
+
+	
+
+	void updateFunc(void) {
 
 		// model transform for the cube
 		matCube = glm::mat4(1.0F);
 		matCube = glm::translate(matCube, glm::vec3(0.0F, 0.0F, 0.0F));
-		//matCube = glm::rotate(matCube, 2.0F * theta, glm::vec3(1.0F, 0.0F, 0.0F));
 		matCube = glm::scale(matCube, glm::vec3(0.3F, 0.3F, 0.3F));
 		
 
 		cout << current_glCamera_position.x << " , " << current_glCamera_position.y << "\n";
-		
+
+
+		if (current_face_position.x > current_glCamera_position.x)current_glCamera_position.x += 0.1F;
+		if (current_face_position.x < current_glCamera_position.x)current_glCamera_position.x -= 0.1F;
+		if (current_face_position.y > current_glCamera_position.y)current_glCamera_position.y += 0.1F;
+		if (current_face_position.y < current_glCamera_position.y)current_glCamera_position.y -= 0.1F;
+
 		// viewing transform
 		matView = glm::lookAtRH(
 			current_glCamera_position,
@@ -142,8 +148,15 @@ namespace object {
 			glm::vec3(0.0F, 1.0F, 0.0F)
 		);
 		// projection matrix
+	
+		if (current_degree > org_degree) org_degree += 1.0F;
+		if (current_degree < org_degree) org_degree -= 1.0F;
+
+		printf("%.2f\n", org_degree);
 		const GLfloat aspect = (GLfloat)WIN_W / (GLfloat)WIN_H;
+		fovy = ((GLfloat)M_PI / 180.0F) * org_degree;
 		matProj = glm::perspectiveRH(fovy, aspect, +0.1F, +5.0F);
+
 	}
 
 	void drawFunc(void) {
@@ -205,47 +218,29 @@ namespace object {
 				glfwSetWindowShouldClose(window, GL_TRUE);
 			}
 			break;
-		case GLFW_KEY_R:
-			if (action == GLFW_PRESS) {
-				lastTime = system_clock::now();
-				fovy = ((GLfloat)M_PI / 180.0F) * 30.0F;
-			}
-			break;
-		case GLFW_KEY_J: fovy += ((GLfloat)M_PI / 180.0F) * 1.0F; break;
-		case GLFW_KEY_K: fovy -= ((GLfloat)M_PI / 180.0F) * 1.0F; break;
 		}
 	}
 
-	void updateCamera_Position(int status) {
-		switch (status) {
-		case RIGHT:
-			if (current_face_position.x > current_glCamera_position.x)current_glCamera_position.x += 0.1F;
-			break;
-		case LEFT:
-			if (current_face_position.x < current_glCamera_position.x)current_glCamera_position.x -= 0.1F;
-			break;
-		case UP:
-			if (current_face_position.y > current_glCamera_position.y)current_glCamera_position.y += 0.1F;
-			break;
-		case DOWN:
-			if (current_face_position.y < current_glCamera_position.y)current_glCamera_position.y -= 0.1F;
-			break;
-		}
-	}
 
-	void updateFace_Position(float _moveDegree, int status) {
+	void updateFace_Position_for_XYZ(float _moveDegree, int status) {
 		switch (status) {
 		case RIGHT:		
-			current_face_position.x += _moveDegree / 5;
+			current_face_position.x += _moveDegree / 10;
 			break;
 		case LEFT:
-			current_face_position.x -= _moveDegree / 5;
+			current_face_position.x -= _moveDegree / 10;
 			break;
 		case UP:
-			current_face_position.y += _moveDegree / 5;
+			current_face_position.y += _moveDegree / 10;
 			break;
 		case DOWN:
-			current_face_position.y -= _moveDegree / 5;
+			current_face_position.y -= _moveDegree / 10;
+			break;
+		case GO:
+			current_degree -= _moveDegree * 5.0F;
+			break;
+		case BACK:
+			current_degree += _moveDegree * 5.0F;
 			break;
 		}
 	}
@@ -263,9 +258,6 @@ namespace object {
 		// prepare
 		glfwSetWindowRefreshCallback(window, refreshFunc);
 		glfwSetKeyCallback(window, keyFunc);
-		/*glfwSetCursorEnterCallback(window, cursorEnterFunc);
-		glfwSetCursorPosCallback(window, cursorPosFunc);
-		glfwSetMouseButtonCallback(window, mouseButtonFunc);*/
 		glClearColor(0.5F, 0.5F, 0.5F, 1.0F);
 
 
