@@ -39,10 +39,10 @@ namespace object {
 	void done();
 
 
-	const unsigned int WIN_W = 320; // window size in pixels, (Width, Height)
-	const unsigned int WIN_H = 240;
-	const unsigned int WIN_X = 100; // window position in pixels, (X, Y)
-	const unsigned int WIN_Y = 100;
+	const unsigned int WIN_W = 500; // window size in pixels, (Width, Height)
+	const unsigned int WIN_H = 500;
+	const unsigned int WIN_X = 700; // window position in pixels, (X, Y)
+	const unsigned int WIN_Y = 250;
 
 	const char* vertFileName = "object.vert";
 	const char* fragFileName = "object.frag";
@@ -53,12 +53,24 @@ namespace object {
 
 	GLFWwindow* window;
 
+
+#define RIGHT 1
+#define LEFT -1
+#define UP 2
+#define DOWN -2
+#define STAY 0
+
+
 	glm::mat4 matCube = glm::mat4(1.0F);
 	glm::mat4 matView = glm::mat4(1.0F);
 	glm::mat4 matProj = glm::mat4(1.0F);
 
 	float theta = 0.0F;
 	system_clock::time_point lastTime = system_clock::now();
+
+
+	glm::vec3 current_face_position = glm::vec3(0.0F, 0.0F, 2.0F);
+	glm::vec3 current_glCamera_position = glm::vec3(0.0F, 0.0F, 2.0F);
 
 	float fovy = ((GLfloat)M_PI / 180.0F) * 30.0F; // 30 degree
 
@@ -116,19 +128,22 @@ namespace object {
 
 		// model transform for the cube
 		matCube = glm::mat4(1.0F);
-		matCube = glm::translate(matCube, glm::vec3(0.4F, 0.0F, 0.0F));
-		matCube = glm::rotate(matCube, 2.0F * theta, glm::vec3(1.0F, 0.0F, 0.0F));
+		matCube = glm::translate(matCube, glm::vec3(0.0F, 0.0F, 0.0F));
+		//matCube = glm::rotate(matCube, 2.0F * theta, glm::vec3(1.0F, 0.0F, 0.0F));
 		matCube = glm::scale(matCube, glm::vec3(0.3F, 0.3F, 0.3F));
+		
+
+		cout << current_glCamera_position.x << " , " << current_glCamera_position.y << "\n";
+		
 		// viewing transform
-		const GLfloat radius = 2.0F;
 		matView = glm::lookAtRH(
-			glm::vec3(radius * sinf(theta), 20 * 0.05F, radius * cosf(theta)),
-			glm::vec3(0.02F, 0.0F, 0.0F),
+			current_glCamera_position,
+			glm::vec3(0.0F, 0.0F, 0.0F),
 			glm::vec3(0.0F, 1.0F, 0.0F)
 		);
 		// projection matrix
 		const GLfloat aspect = (GLfloat)WIN_W / (GLfloat)WIN_H;
-		matProj = glm::perspectiveRH(fovy, aspect, +1.0F, +3.0F);
+		matProj = glm::perspectiveRH(fovy, aspect, +0.1F, +5.0F);
 	}
 
 	void drawFunc(void) {
@@ -183,6 +198,58 @@ namespace object {
 		glfwTerminate();
 	}
 
+	void keyFunc(GLFWwindow* window, int key, int scancode, int action, int mods) {
+		switch (key) {
+		case GLFW_KEY_ESCAPE:
+			if (action == GLFW_PRESS) {
+				glfwSetWindowShouldClose(window, GL_TRUE);
+			}
+			break;
+		case GLFW_KEY_R:
+			if (action == GLFW_PRESS) {
+				lastTime = system_clock::now();
+				fovy = ((GLfloat)M_PI / 180.0F) * 30.0F;
+			}
+			break;
+		case GLFW_KEY_J: fovy += ((GLfloat)M_PI / 180.0F) * 1.0F; break;
+		case GLFW_KEY_K: fovy -= ((GLfloat)M_PI / 180.0F) * 1.0F; break;
+		}
+	}
+
+	void updateCamera_Position(int status) {
+		switch (status) {
+		case RIGHT:
+			if (current_face_position.x > current_glCamera_position.x)current_glCamera_position.x += 0.1F;
+			break;
+		case LEFT:
+			if (current_face_position.x < current_glCamera_position.x)current_glCamera_position.x -= 0.1F;
+			break;
+		case UP:
+			if (current_face_position.y > current_glCamera_position.y)current_glCamera_position.y += 0.1F;
+			break;
+		case DOWN:
+			if (current_face_position.y < current_glCamera_position.y)current_glCamera_position.y -= 0.1F;
+			break;
+		}
+	}
+
+	void updateFace_Position(float _moveDegree, int status) {
+		switch (status) {
+		case RIGHT:		
+			current_face_position.x += _moveDegree / 5;
+			break;
+		case LEFT:
+			current_face_position.x -= _moveDegree / 5;
+			break;
+		case UP:
+			current_face_position.y += _moveDegree / 5;
+			break;
+		case DOWN:
+			current_face_position.y -= _moveDegree / 5;
+			break;
+		}
+	}
+
 	void init_Func(void) {
 
 		//// start GLFW & GLEW
@@ -195,8 +262,8 @@ namespace object {
 		//
 		// prepare
 		glfwSetWindowRefreshCallback(window, refreshFunc);
-		/*glfwSetKeyCallback(window, keyFunc);
-		glfwSetCursorEnterCallback(window, cursorEnterFunc);
+		glfwSetKeyCallback(window, keyFunc);
+		/*glfwSetCursorEnterCallback(window, cursorEnterFunc);
 		glfwSetCursorPosCallback(window, cursorPosFunc);
 		glfwSetMouseButtonCallback(window, mouseButtonFunc);*/
 		glClearColor(0.5F, 0.5F, 0.5F, 1.0F);
