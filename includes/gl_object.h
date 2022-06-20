@@ -24,7 +24,7 @@ using namespace std::chrono;
 #pragma comment(lib, "glfw3.lib")
 #pragma warning(disable: 4711 4710 4100)
 
-#include "./common.c"
+#include "../common.c"
 
 namespace object {
 
@@ -35,8 +35,8 @@ namespace object {
 	const unsigned int WIN_X = 700; // window position in pixels, (X, Y)
 	const unsigned int WIN_Y = 250;
 
-	const char* vertFileName = "object.vert";
-	const char* fragFileName = "object.frag";
+	const char* vertFileName = "./shaders/object.vert";
+	const char* fragFileName = "./shaders/object.frag";
 
 	GLuint vert = 0; // vertex shader ID number
 	GLuint frag = 0; // fragment shader ID number

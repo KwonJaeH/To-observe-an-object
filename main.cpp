@@ -1,5 +1,5 @@
-#include "cv_camera.h"
-#include "gl_object.h"
+#include "./includes/cv_camera.h"
+#include "./includes/gl_object.h"
 using namespace camera;
 using namespace object;
 
